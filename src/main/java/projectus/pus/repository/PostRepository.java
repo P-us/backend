@@ -1,4 +1,10 @@
 package projectus.pus.repository;
 
-public interface PostRepository {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+import projectus.pus.entity.Post;
+
+@Repository
+public interface PostRepository extends JpaRepository<Post,Long> {
+
 }
