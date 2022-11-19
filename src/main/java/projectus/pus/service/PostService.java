@@ -1,8 +1,11 @@
 package projectus.pus.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import projectus.pus.dto.PostDto;
 import projectus.pus.entity.Photo;
@@ -11,9 +14,15 @@ import projectus.pus.repository.PhotoRepository;
 import projectus.pus.repository.PostRepository;
 import projectus.pus.utils.PhotoHandler;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PostService {
 
@@ -23,7 +32,7 @@ public class PostService {
     @Transactional
     public Long addPost(PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
         Post post = requestDto.toEntity();
-        List<Photo> photoList = photoHandler.parseFileInfo(files);
+        List<Photo> photoList = photoHandler.parseFileInfo(files); //todo 시간 남는다면 PhotoService 생성해서 리팩토링
         if(!photoList.isEmpty()) {
             for(Photo photo : photoList) {
                 post.addPhoto(photoRepository.save(photo));
@@ -33,16 +42,43 @@ public class PostService {
     }
 
     @Transactional(readOnly = true)
-    public PostDto.Response findPost(Long postId) {
+    public PostDto.Response getDetailPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        return new PostDto.Response(post);
+         List<Long> fileId = photoRepository.findAllByPostId(postId)
+                 .stream()
+                 .map(Photo::getId)
+                 .collect(Collectors.toList());
+        return new PostDto.Response(post,fileId);
     }
-
+    @Transactional(readOnly = true)
+    public byte[] getImage(Long photoId) throws IOException {
+        String path = photoRepository.findById(photoId).orElseThrow(
+                () -> new IllegalArgumentException("해당 사진이 존재하지 않습니다.")).getFilePath();
+        String absolutePath = new File("").getAbsolutePath() + File.separator + File.separator;
+        InputStream imageStream = new FileInputStream(absolutePath + path);
+        byte[] imageByteArray = IOUtils.toByteArray(imageStream);
+        imageStream.close();
+        return imageByteArray;
+    }
     @Transactional
-    public void updatePost(Long postId, PostDto.Request requestDto) {
+    public void updatePost(Long postId, PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
+        if(!CollectionUtils.isEmpty(dbPhotoList)){
+            for(Photo dbPhoto : dbPhotoList)
+                photoRepository.delete(dbPhoto); //todo 아마존s3와 연결시 파일삭제
+            post.getPhoto().clear();
+        }
+        if(!CollectionUtils.isEmpty(files)){
+            List<Photo> photoList = photoHandler.parseFileInfo(files);
+            if(!photoList.isEmpty()) {
+                for(Photo photo : photoList) {
+                    post.addPhoto(photoRepository.save(photo));
+                }
+            }
+        }
         post.update(requestDto.toEntity());
     }
 

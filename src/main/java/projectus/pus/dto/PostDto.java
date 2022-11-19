@@ -9,6 +9,7 @@ import projectus.pus.entity.Post;
 
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class PostDto {
     @Getter
@@ -21,8 +22,6 @@ public class PostDto {
         private String content;
         //todo user
         private String category;
-
-        //photo
         public Post toEntity(){
             return Post.builder()
                     .title(title)
@@ -42,13 +41,15 @@ public class PostDto {
         private LocalDateTime createdDate;
         private LocalDateTime modifiedDate;
         private String category;
+        private List<Long> photoId;
 
-        public Response(Post entity){
+        public Response(Post entity, List<Long> photoId){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
             this.category = String.valueOf(entity.getCategory());
+            this.photoId = photoId;
         }
     }
 }

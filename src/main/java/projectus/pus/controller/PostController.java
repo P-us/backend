@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import projectus.pus.dto.PostDto;
 import projectus.pus.service.PostService;
 
+import java.io.IOException;
 import java.net.URI;
 import java.util.List;
 
@@ -29,13 +30,19 @@ public class PostController {
     }
 
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDto.Response> findPost(@PathVariable Long postId) {
-        return ResponseEntity.ok().body(postService.findPost(postId));
+    public ResponseEntity<PostDto.Response> getDetailPost(@PathVariable Long postId) {
+        return ResponseEntity.ok().body(postService.getDetailPost(postId));
     }
-
+    @GetMapping("/image/{photoId}")
+    public ResponseEntity<byte[]> getImage(@PathVariable Long photoId) throws IOException {
+        return ResponseEntity.ok().body(postService.getImage(photoId));
+    }
     @PatchMapping("/{postId}")
-    public ResponseEntity<Void> updatePost(@PathVariable Long postId, @RequestBody PostDto.Request requestDto) {
-        postService.updatePost(postId, requestDto);
+    public ResponseEntity<Void> updatePost(
+            @PathVariable Long postId,
+            @RequestPart(value = "photo",required = false) List<MultipartFile> files,
+            @RequestPart(value="requestDto") PostDto.Request requestDto) throws Exception {
+        postService.updatePost(postId, requestDto, files);
         return ResponseEntity.ok().build();
     }
 
