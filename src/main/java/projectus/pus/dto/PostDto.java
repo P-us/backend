@@ -51,5 +51,12 @@ public class PostDto {
             this.category = String.valueOf(entity.getCategory());
             this.photoId = photoId;
         }
+        public Response(Post entity){
+            this.title = entity.getTitle();
+            this.content = entity.getContent();
+            this.createdDate = entity.getCreatedDate();
+            this.modifiedDate = entity.getModifiedDate();
+            this.category = String.valueOf(entity.getCategory());
+        }
     }
 }

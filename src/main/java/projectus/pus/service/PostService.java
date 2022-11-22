@@ -3,11 +3,14 @@ package projectus.pus.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import projectus.pus.dto.PostDto;
+import projectus.pus.entity.Category;
 import projectus.pus.entity.Photo;
 import projectus.pus.entity.Post;
 import projectus.pus.repository.PhotoRepository;
@@ -87,5 +90,11 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         postRepository.delete(post);
+    }
+    @Transactional(readOnly = true)
+    public Page<PostDto.Response> search(String category,String title,List<String> tags, Pageable pageable) {
+        Page<Post> postList = postRepository.findByCategoryAndTitleContains(Category.of(category),title,pageable);
+        //todo tag별로 조회를 하든 다 받아와서 처리를 하든 페이징 깨지지않게
+        return postList.map(PostDto.Response::new);
     }
 }
