@@ -13,8 +13,10 @@ import projectus.pus.dto.PostDto;
 import projectus.pus.entity.Category;
 import projectus.pus.entity.Photo;
 import projectus.pus.entity.Post;
+import projectus.pus.entity.Tag;
 import projectus.pus.repository.PhotoRepository;
 import projectus.pus.repository.PostRepository;
+import projectus.pus.repository.TagRepository;
 import projectus.pus.utils.PhotoHandler;
 
 import java.io.File;
@@ -32,12 +34,22 @@ public class PostService {
     private final PostRepository postRepository;
     private final PhotoHandler photoHandler;
     private final PhotoRepository photoRepository;
+    private final TagRepository tagRepository;
     @Transactional
     public Long addPost(PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
         Post post = requestDto.toEntity();
-        List<Photo> photoList = photoHandler.parseFileInfo(files); //todo 시간 남는다면 PhotoService 생성해서 리팩토링
-        if(!photoList.isEmpty()) {
-            for(Photo photo : photoList) {
+        if(!CollectionUtils.isEmpty(requestDto.getTag())) {
+            List<Tag> tagList = Tag.of(requestDto.getTag());
+            if (!tagList.isEmpty()) {
+                for (Tag tag : tagList) {
+                    tag.setPost(post);
+                    tagRepository.save(tag);
+                }
+            }
+        }
+        List<Photo> photoList = photoHandler.parseFileInfo(files); //todo 시간 남는다면 PhotoService, TagService 생성해서 리팩토링
+        if (!photoList.isEmpty()) {
+            for (Photo photo : photoList) {
                 post.addPhoto(photoRepository.save(photo));
             }
         }
@@ -48,11 +60,16 @@ public class PostService {
     public PostDto.Response getDetailPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-         List<Long> fileId = photoRepository.findAllByPostId(postId)
+        List<String> tagList = tagRepository.findAllByPostId(postId)
+                .stream()
+                .map(Tag::getName)
+                .collect(Collectors.toList());
+        //List<Long> fileId = post.getPhoto().stream().map(Photo::getId).collect(Collectors.toList());
+        List<Long> fileId = photoRepository.findAllByPostId(postId)
                  .stream()
                  .map(Photo::getId)
                  .collect(Collectors.toList());
-        return new PostDto.Response(post,fileId);
+        return new PostDto.Response(post,fileId,tagList);
     }
     @Transactional(readOnly = true)
     public byte[] getImage(Long photoId) throws IOException {
@@ -69,6 +86,20 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
+        List<Tag> dbTagList = tagRepository.findAllByPostId(postId);
+        if(!CollectionUtils.isEmpty(dbTagList)){
+            for(Tag dbTag : dbTagList)
+                tagRepository.delete(dbTag);
+        }
+        if(!CollectionUtils.isEmpty(requestDto.getTag())) {
+            List<Tag> tagList = Tag.of(requestDto.getTag());
+            if (!tagList.isEmpty()) {
+                for (Tag tag : tagList) {
+                    tag.setPost(post);
+                    tagRepository.save(tag);
+                }
+            }
+        }
         if(!CollectionUtils.isEmpty(dbPhotoList)){
             for(Photo dbPhoto : dbPhotoList)
                 photoRepository.delete(dbPhoto); //todo 아마존s3와 연결시 파일삭제

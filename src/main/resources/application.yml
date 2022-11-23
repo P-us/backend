@@ -11,8 +11,9 @@ spring:
       maxRequestSize: 20MB
 
   jpa:
-    show-sql: true
     properties:
       hibernate:
         format_sql: true
-        ddl-auto: create
+        show-sql: true
+    hibernate:
+      ddl-auto: create

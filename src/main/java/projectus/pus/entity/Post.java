@@ -21,7 +21,6 @@ public class Post extends BaseTimeEntity{
     //todo user
     @Enumerated(EnumType.STRING)
     private Category category;
-    //private List<String> tag;
     @OneToMany(
             mappedBy = "post",
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},

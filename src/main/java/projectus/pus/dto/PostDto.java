@@ -22,6 +22,7 @@ public class PostDto {
         private String content;
         //todo user
         private String category;
+        private List<String> tag;
         public Post toEntity(){
             return Post.builder()
                     .title(title)
@@ -41,22 +42,28 @@ public class PostDto {
         private LocalDateTime createdDate;
         private LocalDateTime modifiedDate;
         private String category;
+        private List<String> tag;
         private List<Long> photoId;
-
-        public Response(Post entity, List<Long> photoId){
-            this.title = entity.getTitle();
-            this.content = entity.getContent();
-            this.createdDate = entity.getCreatedDate();
-            this.modifiedDate = entity.getModifiedDate();
-            this.category = String.valueOf(entity.getCategory());
-            this.photoId = photoId;
-        }
         public Response(Post entity){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
             this.category = String.valueOf(entity.getCategory());
+     //       this.tag = entity.getTag()
+     //               .stream()
+     //               .map(Tag::getName)
+     //               .collect(Collectors.toList());
+        }
+
+        public Response(Post entity, List<Long> photoId,List<String> tag){
+            this.title = entity.getTitle();
+            this.content = entity.getContent();
+            this.createdDate = entity.getCreatedDate();
+            this.modifiedDate = entity.getModifiedDate();
+            this.category = String.valueOf(entity.getCategory());
+            this.tag = tag;
+            this.photoId = photoId;
         }
     }
 }
