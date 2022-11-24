@@ -7,7 +7,6 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,8 +21,8 @@ public class Tag extends BaseTimeEntity{
 
     @ManyToOne
     @OnDelete(action= OnDeleteAction.CASCADE)
-    @JoinColumn(name="post_id")
-    private Post post;
+    @JoinColumn(name="category_id")
+    private Category category;
 
     private String name;
 
@@ -38,7 +37,7 @@ public class Tag extends BaseTimeEntity{
                 .collect(Collectors.toList());
     }
 
-    public void setPost(Post post){
-        this.post = post;
+    public void setCategory(Category category){
+        this.category = category;
     }
 }

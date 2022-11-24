@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import projectus.pus.entity.Category;
 import projectus.pus.entity.Post;
 
 import javax.validation.constraints.NotBlank;
@@ -21,15 +20,20 @@ public class PostDto {
         private String title;
         private String content;
         //todo user
-        private String category;
-        private List<String> tag;
+        private List<CategoryRequest> category;
         public Post toEntity(){
             return Post.builder()
                     .title(title)
                     .content(content)
-                    .category(Category.of(category))
                     .build();
         }
+    }
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CategoryRequest{
+        private String field;
+        private List<String> tag;
     }
     @Getter
     @Builder
@@ -41,29 +45,29 @@ public class PostDto {
         //user
         private LocalDateTime createdDate;
         private LocalDateTime modifiedDate;
-        private String category;
-        private List<String> tag;
+        private List<CategoryResponse> category;
         private List<Long> photoId;
         public Response(Post entity){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
-            this.category = String.valueOf(entity.getCategory());
-     //       this.tag = entity.getTag()
-     //               .stream()
-     //               .map(Tag::getName)
-     //               .collect(Collectors.toList());
         }
 
-        public Response(Post entity, List<Long> photoId,List<String> tag){
+        public Response(Post entity, List<Long> photoId, List<CategoryResponse> category){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
-            this.category = String.valueOf(entity.getCategory());
-            this.tag = tag;
+            this.category = category;
             this.photoId = photoId;
         }
+    }
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CategoryResponse{
+        private String field;
+        private List<String> tag;
     }
 }

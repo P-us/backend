@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -31,23 +32,15 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class PostService {
 
+    private final CategoryService categoryService;
     private final PostRepository postRepository;
     private final PhotoHandler photoHandler;
     private final PhotoRepository photoRepository;
-    private final TagRepository tagRepository;
     @Transactional
     public Long addPost(PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
         Post post = requestDto.toEntity();
-        if(!CollectionUtils.isEmpty(requestDto.getTag())) {
-            List<Tag> tagList = Tag.of(requestDto.getTag());
-            if (!tagList.isEmpty()) {
-                for (Tag tag : tagList) {
-                    tag.setPost(post);
-                    tagRepository.save(tag);
-                }
-            }
-        }
-        List<Photo> photoList = photoHandler.parseFileInfo(files); //todo 시간 남는다면 PhotoService, TagService 생성해서 리팩토링
+        categoryService.addCategory(requestDto,post);
+        List<Photo> photoList = photoHandler.parseFileInfo(files); //todo 시간 남는다면 PhotoService 리팩토링
         if (!photoList.isEmpty()) {
             for (Photo photo : photoList) {
                 post.addPhoto(photoRepository.save(photo));
@@ -60,16 +53,12 @@ public class PostService {
     public PostDto.Response getDetailPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        List<String> tagList = tagRepository.findAllByPostId(postId)
-                .stream()
-                .map(Tag::getName)
-                .collect(Collectors.toList());
         //List<Long> fileId = post.getPhoto().stream().map(Photo::getId).collect(Collectors.toList());
         List<Long> fileId = photoRepository.findAllByPostId(postId)
                  .stream()
                  .map(Photo::getId)
                  .collect(Collectors.toList());
-        return new PostDto.Response(post,fileId,tagList);
+        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId));
     }
     @Transactional(readOnly = true)
     public byte[] getImage(Long photoId) throws IOException {
@@ -85,21 +74,8 @@ public class PostService {
     public void updatePost(Long postId, PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        categoryService.updateCategory(post, postId, requestDto);
         List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
-        List<Tag> dbTagList = tagRepository.findAllByPostId(postId);
-        if(!CollectionUtils.isEmpty(dbTagList)){
-            for(Tag dbTag : dbTagList)
-                tagRepository.delete(dbTag);
-        }
-        if(!CollectionUtils.isEmpty(requestDto.getTag())) {
-            List<Tag> tagList = Tag.of(requestDto.getTag());
-            if (!tagList.isEmpty()) {
-                for (Tag tag : tagList) {
-                    tag.setPost(post);
-                    tagRepository.save(tag);
-                }
-            }
-        }
         if(!CollectionUtils.isEmpty(dbPhotoList)){
             for(Photo dbPhoto : dbPhotoList)
                 photoRepository.delete(dbPhoto); //todo 아마존s3와 연결시 파일삭제
@@ -122,10 +98,14 @@ public class PostService {
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         postRepository.delete(post);
     }
+    /*
     @Transactional(readOnly = true)
-    public Page<PostDto.Response> search(String category,String title,List<String> tags, Pageable pageable) {
+    public Page<PostDto.Response> search(String category,String title,List<String> tag, Pageable pageable) {
         Page<Post> postList = postRepository.findByCategoryAndTitleContains(Category.of(category),title,pageable);
         //todo tag별로 조회를 하든 다 받아와서 처리를 하든 페이징 깨지지않게
+        //각각 findby해서 post id 를 받아온뒤 널빼고 교집합하여 findallby로 페이징처리하기?
         return postList.map(PostDto.Response::new);
     }
+
+     */
 }

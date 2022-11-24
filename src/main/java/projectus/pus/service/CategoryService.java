@@ -1,0 +1,65 @@
+package projectus.pus.service;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
+import projectus.pus.dto.PostDto;
+import projectus.pus.entity.Category;
+import projectus.pus.entity.Post;
+import projectus.pus.repository.CategoryRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
+@Service
+@Slf4j
+@RequiredArgsConstructor
+public class CategoryService {
+
+    private final CategoryRepository categoryRepository;
+    private final TagService tagService;
+    @Transactional
+    public void addCategory(PostDto.Request requestDto, Post post){
+        if(!CollectionUtils.isEmpty(requestDto.getCategory())) {
+            for (PostDto.CategoryRequest categoryList : requestDto.getCategory()){
+                Category category = Category
+                        .builder()
+                        .field(categoryList.getField())
+                        .post(post)
+                        .build();
+                categoryRepository.save(category);
+                tagService.addTag(categoryList.getTag(),category);
+            }
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public List<PostDto.CategoryResponse> getCategoryList(Long postId) {
+        return categoryRepository.findAllByPostId(postId)
+                .stream()
+                .map(c -> new PostDto.CategoryResponse(c.getField(), tagService.getTagList(c.getId())))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void updateCategory(Post post, Long postId, PostDto.Request requestDto) {
+        List<Category> dbCategoryList = categoryRepository.findAllByPostId(postId);
+        if (!CollectionUtils.isEmpty(dbCategoryList)){
+            for(Category dbCategory : dbCategoryList)
+                categoryRepository.delete(dbCategory);
+        }
+        if(!CollectionUtils.isEmpty(requestDto.getCategory())) {
+            for (PostDto.CategoryRequest categoryList : requestDto.getCategory()){
+                Category category = Category
+                        .builder()
+                        .field(categoryList.getField())
+                        .post(post)
+                        .build();
+                categoryRepository.save(category);
+                tagService.addTag(categoryList.getTag(),category);
+            }
+        }
+    }
+}

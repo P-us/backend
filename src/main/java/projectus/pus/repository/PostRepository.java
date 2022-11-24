@@ -9,5 +9,5 @@ import projectus.pus.entity.Post;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post,Long> {
-    Page<Post> findByCategoryAndTitleContains(Category category, String title, Pageable pageable);
+   // Page<Post> findByCategoryAndTitleContains(Category category, String title, Pageable pageable);
 }

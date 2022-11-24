@@ -19,8 +19,6 @@ public class Post extends BaseTimeEntity{
     private String title;
     private String content;
     //todo user
-    @Enumerated(EnumType.STRING)
-    private Category category;
     @OneToMany(
             mappedBy = "post",
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
@@ -28,15 +26,13 @@ public class Post extends BaseTimeEntity{
     )
     private List<Photo> photo = new ArrayList<>();
     @Builder
-    public Post(String title, String content, Category category) {
+    public Post(String title, String content) {
         this.title = title;
         this.content = content;
-        this.category = category;
     }
     public void update(Post post) {
         this.title = post.title;
         this.content = post.content;
-        this.category = post.category;
     }
     public void addPhoto(Photo photo) {
         this.photo.add(photo);
