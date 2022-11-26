@@ -39,5 +39,29 @@ public class User {
         this.email = email;
         this.password = password;
         this.userName = userName;
+
+        addAuthority(Authority.toUser(this));
     }
+
+    private void addAuthority(Authority authority) {
+        authorities.add(authority);
+    }
+
+    public List<String> getRoles() {
+        return authorities.stream()
+                .map(Authority::getRole)
+                .collect(toList());
+    }
+
+    public void encodePW(String pw) {
+        this.password = pw;
+    }
+
+    public void update(User user) {
+
+        this.email = email;
+        this.password = password;
+        this.userName = userName;
+    }
+
 }
