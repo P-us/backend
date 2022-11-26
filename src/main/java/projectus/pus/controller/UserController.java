@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import projectus.pus.dto.UserDto;
 import projectus.pus.service.UserService;
 
+import java.net.URI;
+
 @RequiredArgsConstructor
 @RestController
 @Slf4j
@@ -19,19 +21,9 @@ public class UserController {
     @Autowired
     private final UserService userService;
 
-    @PostMapping
-//    추후 @PreAuthorize("hasRole('')) 추가해야함
-    public ResponseEntity<Long> addUser(@Validated @RequestBody UserDto.Request requestDto, Errors errors) {
-//        if(errors.hasErrors()) {
-//            return ResponseEntity.ok().body());
-//        }
-        Long userId = userService.addUser(requestDto);
-        return ResponseEntity.ok().body(userId);
-    }
-
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto.Response> getUser(@PathVariable Long userId) {
-        UserDto.Response responseDto = userService.getUser(userId);
+        UserDto.Response responseDto = userService.findUser(userId);
         return ResponseEntity.ok().body(responseDto);
     }
 
@@ -44,16 +36,7 @@ public class UserController {
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build(); //별도로 반환해야 할 데이터가 없을경우 +201
     }
 
-    @GetMapping("/login")
-    public ResponseEntity<?> login() {
-        return ResponseEntity.ok().build();
-    }
-
-    @GetMapping("/logout")
-    public ResponseEntity<?> logout() {
-        return ResponseEntity.ok().build();
-    }
 }
