@@ -40,6 +40,7 @@ public class PostDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class Response{
+        private Long postId;
         private String title;
         private String content;
         //user
@@ -48,6 +49,7 @@ public class PostDto {
         private List<CategoryResponse> category;
         private List<Long> photoId;
         public Response(Post entity, List<CategoryResponse> category){
+            this.postId = entity.getId();
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
