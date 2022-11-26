@@ -4,26 +4,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 import projectus.pus.dto.PostDto;
-import projectus.pus.entity.Category;
 import projectus.pus.entity.Photo;
 import projectus.pus.entity.Post;
-import projectus.pus.entity.Tag;
 import projectus.pus.repository.PhotoRepository;
 import projectus.pus.repository.PostRepository;
-import projectus.pus.repository.TagRepository;
 import projectus.pus.utils.PhotoHandler;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -48,7 +46,6 @@ public class PostService {
         }
         return postRepository.save(post).getId();
     }
-
     @Transactional(readOnly = true)
     public PostDto.Response getDetailPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
@@ -91,21 +88,34 @@ public class PostService {
         }
         post.update(requestDto.toEntity());
     }
-
     @Transactional
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         postRepository.delete(post);
     }
-    /*
     @Transactional(readOnly = true)
     public Page<PostDto.Response> search(String category,String title,List<String> tag, Pageable pageable) {
-        Page<Post> postList = postRepository.findByCategoryAndTitleContains(Category.of(category),title,pageable);
-        //todo tag별로 조회를 하든 다 받아와서 처리를 하든 페이징 깨지지않게
-        //각각 findby해서 post id 를 받아온뒤 널빼고 교집합하여 findallby로 페이징처리하기?
-        return postList.map(PostDto.Response::new);
+        List<Long> searchId = categoryService.search(category,tag);
+        List<Post> postList;
+        if(!searchId.isEmpty()) {
+            postList = postRepository.findByIdInAndTitleContains(searchId, title, pageable);
+        }
+        else {
+            if(category==null&&category.isBlank()&& tag.isEmpty()) {
+                postList = postRepository.findByTitleContains(title, pageable);
+            }
+            else{
+                postList = new ArrayList<>(); //todo 이거 예외처리 다시 생각
+            }
+        }
+        List<PostDto.Response> collect = postList
+                .stream()
+                .map(post ->
+                        new PostDto.Response(post,categoryService.getCategoryList(post.getId())))
+                .collect(Collectors.toList());
+        int start = (int)pageable.getOffset();
+        int end = Math.min((start+pageable.getPageSize()),collect.size());
+        return new PageImpl<>(collect.subList(start, end), pageable, collect.size());
     }
-
-     */
 }

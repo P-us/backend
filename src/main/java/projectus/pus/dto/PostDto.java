@@ -47,11 +47,12 @@ public class PostDto {
         private LocalDateTime modifiedDate;
         private List<CategoryResponse> category;
         private List<Long> photoId;
-        public Response(Post entity){
+        public Response(Post entity, List<CategoryResponse> category){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
+            this.category = category;
         }
 
         public Response(Post entity, List<Long> photoId, List<CategoryResponse> category){

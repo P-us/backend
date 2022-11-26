@@ -19,6 +19,9 @@ public class Post extends BaseTimeEntity{
     private String title;
     private String content;
     //todo user
+
+    @OneToMany(mappedBy = "post")
+    private List<Category> category = new ArrayList<>();
     @OneToMany(
             mappedBy = "post",
             cascade = {CascadeType.PERSIST, CascadeType.REMOVE},
@@ -33,6 +36,11 @@ public class Post extends BaseTimeEntity{
     public void update(Post post) {
         this.title = post.title;
         this.content = post.content;
+    }
+    public void addCategory(Category category){
+        this.category.add(category);
+        if(category.getPost() !=this)
+            category.setPost(this);
     }
     public void addPhoto(Photo photo) {
         this.photo.add(photo);

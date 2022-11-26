@@ -25,11 +25,11 @@ public class Category extends BaseTimeEntity{
     private String field;
 
     @Builder
-    public Category(String field, Post post){
+    public Category(String field){
         this.field = field;
-        this.post = post;
     }
     public void setPost(Post post){
         this.post = post;
+        post.getCategory().add(this);
     }
 }

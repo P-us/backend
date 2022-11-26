@@ -12,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import projectus.pus.dto.PostDto;
-import projectus.pus.service.CategoryService;
 import projectus.pus.service.PostService;
 
 import java.io.IOException;
@@ -54,14 +53,10 @@ public class PostController {
         postService.deletePost(postId);
         return ResponseEntity.noContent().build();
     }
-    /*
     @GetMapping("/search")
-    public ResponseEntity<Page<PostDto.Response>> search(//todo 카테고리 1:다 로 변경
+    public ResponseEntity<Page<PostDto.Response>> search(
             @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag,
             @PageableDefault(sort="modifiedDate",direction = Sort.Direction.DESC)Pageable pageable) {
         return ResponseEntity.ok().body(postService.search(category,title,tag, pageable));
     }
-
-     */
-
 }

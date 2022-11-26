@@ -27,8 +27,8 @@ public class CategoryService {
                 Category category = Category
                         .builder()
                         .field(categoryList.getField())
-                        .post(post)
                         .build();
+                category.setPost(post);
                 categoryRepository.save(category);
                 tagService.addTag(categoryList.getTag(),category);
             }
@@ -55,11 +55,32 @@ public class CategoryService {
                 Category category = Category
                         .builder()
                         .field(categoryList.getField())
-                        .post(post)
                         .build();
+                category.setPost(post);
                 categoryRepository.save(category);
                 tagService.addTag(categoryList.getTag(),category);
             }
         }
+    }
+
+    public List<Long> search(String category, List<String> tag) {
+        List<Long> searchId;
+        if (category==null||category.isBlank()){
+            if(tag.isEmpty()){
+                searchId = categoryRepository.findAllPost();
+            }
+            else {
+                searchId = categoryRepository.findByTag(tag);
+            }
+        }
+        else{
+            if(tag.isEmpty()) {
+                searchId = categoryRepository.findByCategory(category);
+            }
+            else {
+                searchId = categoryRepository.findByCategoryAndTag(category,tag);
+            }
+        }
+        return searchId;
     }
 }
