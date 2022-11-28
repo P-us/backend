@@ -33,8 +33,8 @@ public class PostController {
         return ResponseEntity.created(URI.create("/api/posts/"+postId)).build();
     }
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDto.Response> getDetailPost(@PathVariable Long postId) {
-        return ResponseEntity.ok().body(postService.getDetailPost(postId));
+    public ResponseEntity<PostDto.Response> getDetailPost(@PathVariable Long postId,@RequestParam Long userId ) { //todo userId jwt 바꾸기
+        return ResponseEntity.ok().body(postService.getDetailPost(postId,userId));
     }
     @GetMapping("/image/{photoId}")
     public ResponseEntity<byte[]> getImage(@PathVariable Long photoId) throws IOException {
@@ -55,8 +55,8 @@ public class PostController {
     }
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto.Response>> search(
-            @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag,
+            @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag,@RequestParam Long userId,  //todo userId jwt 바꾸기
             @PageableDefault(sort="modifiedDate",direction = Sort.Direction.DESC)Pageable pageable) {
-        return ResponseEntity.ok().body(postService.search(category,title,tag, pageable));
+        return ResponseEntity.ok().body(postService.search(category,title,tag,userId, pageable));
     }
 }

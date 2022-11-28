@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final CategoryService categoryService;
+    private final LikeService likeService;
     private final PostRepository postRepository;
     private final PhotoHandler photoHandler;
     private final PhotoRepository photoRepository;
@@ -47,7 +48,7 @@ public class PostService {
         return postRepository.save(post).getId();
     }
     @Transactional(readOnly = true)
-    public PostDto.Response getDetailPost(Long postId) {
+    public PostDto.Response getDetailPost(Long postId,Long userId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         //List<Long> fileId = post.getPhoto().stream().map(Photo::getId).collect(Collectors.toList());
@@ -55,7 +56,7 @@ public class PostService {
                  .stream()
                  .map(Photo::getId)
                  .collect(Collectors.toList());
-        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId));
+        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId),likeService.getLike(postId,userId));
     }
     @Transactional(readOnly = true)
     public byte[] getImage(Long photoId) throws IOException {
@@ -95,7 +96,7 @@ public class PostService {
         postRepository.delete(post);
     }
     @Transactional(readOnly = true)
-    public Page<PostDto.Response> search(String category,String title,List<String> tag, Pageable pageable) {
+    public Page<PostDto.Response> search(String category,String title,List<String> tag, Long userId,Pageable pageable) {
         List<Long> searchId = categoryService.search(category,tag);
         List<Post> postList;
         if(!searchId.isEmpty()) {
@@ -112,7 +113,7 @@ public class PostService {
         List<PostDto.Response> collect = postList
                 .stream()
                 .map(post ->
-                        new PostDto.Response(post,categoryService.getCategoryList(post.getId())))
+                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()),likeService.getLike(post.getId(),userId))) //todo postDto에 좋아요 숫자 추가하고, response에 likeService.getLike
                 .collect(Collectors.toList());
         int start = (int)pageable.getOffset();
         int end = Math.min((start+pageable.getPageSize()),collect.size());

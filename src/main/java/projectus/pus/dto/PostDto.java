@@ -48,22 +48,27 @@ public class PostDto {
         private LocalDateTime modifiedDate;
         private List<CategoryResponse> category;
         private List<Long> photoId;
-        public Response(Post entity, List<CategoryResponse> category){
+        private Long likeCount;
+        private boolean check;
+        public Response(Post entity, List<CategoryResponse> category,LikeResponse likeResponse){
             this.postId = entity.getId();
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
             this.category = category;
+            this.likeCount = likeResponse.getLikeCount();
         }
 
-        public Response(Post entity, List<Long> photoId, List<CategoryResponse> category){
+        public Response(Post entity, List<Long> photoId, List<CategoryResponse> category, LikeResponse likeResponse){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
             this.category = category;
             this.photoId = photoId;
+            this.likeCount = likeResponse.getLikeCount();
+            this.check = likeResponse.isCheck();
         }
     }
     @Getter
@@ -72,5 +77,12 @@ public class PostDto {
     public static class CategoryResponse{
         private String field;
         private List<String> tag;
+    }
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class LikeResponse{
+        private long likeCount;
+        private boolean check;
     }
 }
