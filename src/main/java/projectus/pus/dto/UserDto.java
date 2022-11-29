@@ -35,11 +35,11 @@ public class UserDto {
 
 
 
-        public User toEntity(){
+        public User toEntity(PasswordEncoder passwordEncoder){
 
             return User.builder()
                     .email(email)
-                    .password(password)
+                    .password(passwordEncoder.encode(password))
                     .userName(userName)
                     .build();
         }
@@ -61,13 +61,13 @@ public class UserDto {
         @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
         private String password;
 
-        public User tologin(){
-
-            return User.builder()
-                    .email(email)
-                    .password(password)
-                    .build();
-        }
+//        public User tologin(){
+//
+//            return User.builder()
+//                    .email(email)
+//                    .password(password)
+//                    .build();
+//        }
 
     }
 

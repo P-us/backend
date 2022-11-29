@@ -24,7 +24,7 @@ public class SignController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    @PostMapping("/users")
+    @PostMapping("/join")
     public ResponseEntity<Long> addUser(@Validated @RequestBody UserDto.Request requestDto, Errors errors) {
         Long userId = userService.addUser(requestDto);
         return ResponseEntity.created(URI.create("/api/users/"+userId)).build();

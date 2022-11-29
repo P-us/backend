@@ -2,6 +2,7 @@ package projectus.pus.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -35,11 +36,16 @@ public class UserService {
     private final JwtTokenUtil jwtTokenUtil;
 
     public Long addUser(UserDto.Request requestDto) {
+        validateDuplicateUser(requestDto);
+        User user = userRepository.save(requestDto.toEntity(passwordEncoder));
 
-        String encodePassword = passwordEncoder.encode(requestDto.getPassword());
-        User user = userRepository.save(requestDto.toEntity());
-        user.encodePW(encodePassword);
         return user.getId();
+    }
+    private void validateDuplicateUser(UserDto.Request requestDto) {
+        if(userRepository.existsByEmail(requestDto.getEmail()))
+            throw new IllegalArgumentException("해당 이메일이 이미 존재합니다.");
+        if(userRepository.existsByUserName(requestDto.getUserName()))
+            throw new IllegalArgumentException("해당 닉네임이 이미 존재합니다.");
     }
 
     public UserDto.Response findUser(Long userId) {
@@ -51,8 +57,8 @@ public class UserService {
     public void updateUser(Long userId, UserDto.Request requestDto) {
         User user = userRepository.findById(userId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-
-        user.update(requestDto.toEntity());
+        validateDuplicateUser(requestDto);
+        user.update(requestDto, passwordEncoder);
     }
 
     public void deleteUser(Long userId) {

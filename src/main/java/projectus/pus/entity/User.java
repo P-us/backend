@@ -4,7 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import projectus.pus.dto.UserDto;
 
 import javax.persistence.*;
 
@@ -53,15 +55,17 @@ public class User {
                 .collect(toList());
     }
 
-    public void encodePW(String pw) {
-        this.password = pw;
+    public void update(UserDto.Request requestDto, PasswordEncoder passwordEncoder) {
+
+        if (requestDto.getUserName() != null) {
+            this.userName = requestDto.getUserName();
+        }
+
+        if (requestDto.getPassword() != null) {
+            this.password = passwordEncoder.encode(requestDto.getPassword());
+        }
+
     }
 
-    public void update(User user) {
-
-        this.email = email;
-        this.password = password;
-        this.userName = userName;
-    }
 
 }
