@@ -26,4 +26,3 @@ spring:
 # echo -n 'thisisstudymatcingprojectnamedpus'
 jwt:
   secret: dGhpc2lzc3R1ZHltYXRjaGluZ3Byb2plY3RuYW1lZHB1cw==
->>>>>>> origin/feature/auth
