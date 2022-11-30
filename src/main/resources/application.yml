@@ -13,6 +13,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
+    generate-ddl: true
     show-sql: true
     properties:
       hibernate:
@@ -21,6 +22,9 @@ spring:
   redis:
     port: 6379
     host: localhost
+
+  profiles:
+    active: s3
 
 # HS256????, 32byte ?? secret key ??
 # echo -n 'thisisstudymatcingprojectnamedpus'

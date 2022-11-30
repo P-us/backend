@@ -48,27 +48,27 @@ public class PostDto {
         private LocalDateTime modifiedDate;
         private List<CategoryResponse> category;
         private List<Long> photoId;
-        private Long likeCount;
+        private Long likesCount;
         private boolean check;
-        public Response(Post entity, List<CategoryResponse> category,LikeResponse likeResponse){
+        public Response(Post entity, List<CategoryResponse> category,LikesResponse likesResponse){
             this.postId = entity.getId();
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
             this.category = category;
-            this.likeCount = likeResponse.getLikeCount();
+            this.likesCount = likesResponse.getLikesCount();
         }
 
-        public Response(Post entity, List<Long> photoId, List<CategoryResponse> category, LikeResponse likeResponse){
+        public Response(Post entity, List<Long> photoId, List<CategoryResponse> category, LikesResponse likesResponse){
             this.title = entity.getTitle();
             this.content = entity.getContent();
             this.createdDate = entity.getCreatedDate();
             this.modifiedDate = entity.getModifiedDate();
             this.category = category;
             this.photoId = photoId;
-            this.likeCount = likeResponse.getLikeCount();
-            this.check = likeResponse.isCheck();
+            this.likesCount = likesResponse.getLikesCount();
+            this.check = likesResponse.isCheck();
         }
     }
     @Getter
@@ -81,8 +81,8 @@ public class PostDto {
     @Getter
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class LikeResponse{
-        private long likeCount;
+    public static class LikesResponse{
+        private long likesCount;
         private boolean check;
     }
 }

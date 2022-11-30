@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import projectus.pus.dto.PostDto;
+import projectus.pus.service.LikesService;
 import projectus.pus.service.PostService;
 
 import java.io.IOException;
@@ -24,6 +25,8 @@ import java.util.List;
 public class PostController {
     @Autowired
     private final PostService postService;
+    @Autowired
+    private final LikesService likesService;
 
     @PostMapping
     public ResponseEntity<Void> addPost(
@@ -58,5 +61,16 @@ public class PostController {
             @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag,@RequestParam Long userId,  //todo userId jwt 바꾸기
             @PageableDefault(sort="modifiedDate",direction = Sort.Direction.DESC)Pageable pageable) {
         return ResponseEntity.ok().body(postService.search(category,title,tag,userId, pageable));
+    }
+
+    @GetMapping("/likes/{postId}")
+    public ResponseEntity<Void> likes(@PathVariable Long postId, @RequestParam Long userId){ //todo userId jwt 바꾸기
+        likesService.addLikes(postId,userId);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/dislikes/{postId}")
+    public ResponseEntity<Void> dislikes(@PathVariable Long postId, @RequestParam Long userId){ //todo userId jwt 바꾸기
+        likesService.deleteLikes(postId,userId);
+        return ResponseEntity.ok().build();
     }
 }

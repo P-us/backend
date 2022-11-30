@@ -1,11 +1,14 @@
 package projectus.pus.service;
 
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
@@ -21,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,7 +35,7 @@ import java.util.stream.Collectors;
 public class PostService {
 
     private final CategoryService categoryService;
-    private final LikeService likeService;
+    private final LikesService likesService;
     private final PostRepository postRepository;
     private final PhotoHandler photoHandler;
     private final PhotoRepository photoRepository;
@@ -56,7 +60,7 @@ public class PostService {
                  .stream()
                  .map(Photo::getId)
                  .collect(Collectors.toList());
-        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId),likeService.getLike(postId,userId));
+        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId), likesService.getLikes(postId,userId));
     }
     @Transactional(readOnly = true)
     public byte[] getImage(Long photoId) throws IOException {
@@ -68,6 +72,19 @@ public class PostService {
         imageStream.close();
         return imageByteArray;
     }
+    @Transactional(readOnly = true)
+    public byte[] getImageS3(Long photoId) throws IOException {
+        String path = photoRepository.findById(photoId).orElseThrow(
+                () -> new IllegalArgumentException("해당 사진이 존재하지 않습니다.")).getFilePath();
+        S3ObjectInputStream objectInputStream = photoHandler.getS3InputStream(path);
+        byte[] bytes = IOUtils.toByteArray(objectInputStream);
+        String fileName = URLEncoder.encode(path, "UTF-8").replaceAll("\\+", "%20");
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        httpHeaders.setContentLength(bytes.length);
+        httpHeaders.setContentDispositionFormData("attachment", fileName);
+        return bytes;
+    }
     @Transactional
     public void updatePost(Long postId, PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
         Post post = postRepository.findById(postId).orElseThrow(
@@ -75,8 +92,10 @@ public class PostService {
         categoryService.updateCategory(post, postId, requestDto);
         List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
         if(!CollectionUtils.isEmpty(dbPhotoList)){
-            for(Photo dbPhoto : dbPhotoList)
-                photoRepository.delete(dbPhoto); //todo 아마존s3와 연결시 파일삭제
+            for(Photo dbPhoto : dbPhotoList) {
+                photoRepository.delete(dbPhoto);
+    //            photoHandler.deleteFile(dbPhoto.getFilePath()); //s3
+            }
             post.getPhoto().clear();
         }
         if(!CollectionUtils.isEmpty(files)){
@@ -93,6 +112,12 @@ public class PostService {
     public void deletePost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+//        List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
+//        if(!CollectionUtils.isEmpty(dbPhotoList)){
+//            for(Photo dbPhoto : dbPhotoList) {
+//                photoHandler.deleteFile(dbPhoto.getFilePath()); //s3
+//            }
+//        }
         postRepository.delete(post);
     }
     @Transactional(readOnly = true)
@@ -113,7 +138,7 @@ public class PostService {
         List<PostDto.Response> collect = postList
                 .stream()
                 .map(post ->
-                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()),likeService.getLike(post.getId(),userId))) //todo postDto에 좋아요 숫자 추가하고, response에 likeService.getLike
+                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()), likesService.getLikes(post.getId(),userId))) //todo postDto에 좋아요 숫자 추가하고, response에 likeService.getLike
                 .collect(Collectors.toList());
         int start = (int)pageable.getOffset();
         int end = Math.min((start+pageable.getPageSize()),collect.size());
