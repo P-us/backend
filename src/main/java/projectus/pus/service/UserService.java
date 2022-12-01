@@ -2,7 +2,6 @@ package projectus.pus.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -51,7 +50,7 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         validateDuplicateUser(requestDto);
-        user.update(requestDto, passwordEncoder);
+        user.updateData(requestDto, passwordEncoder);
     }
 
     public void deleteUser(Long userId) {

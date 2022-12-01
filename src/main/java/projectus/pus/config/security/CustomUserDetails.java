@@ -21,26 +21,25 @@ import static java.util.stream.Collectors.toList;
 @AllArgsConstructor
 @Builder
 public class CustomUserDetails implements UserDetails {
-
-    private String email;
+    private static final long serialVersionUID = 1L;
     private String password;
-    @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    private String username;
+    private Collection<? extends GrantedAuthority> authorities;
 
-    public static UserDetails of(User user) {
+    public static CustomUserDetails of(User user) {
+        List<GrantedAuthority> authorities = user.getRoles().stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(toList());
         return CustomUserDetails.builder()
-                .email(user.getEmail())
+                .username(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRoles())
+                .authorities(authorities)
                 .build();
     }
-
     @Override
     @JsonIgnore
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(toList());
+        return authorities == null ? null : new ArrayList<>(authorities);
     }
 
     @Override
@@ -50,7 +49,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return username;
     }
 
     @Override

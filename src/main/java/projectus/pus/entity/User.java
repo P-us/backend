@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import projectus.pus.dto.UserDto;
 
 import javax.persistence.*;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,7 +57,7 @@ public class User {
                 .collect(toList());
     }
 
-    public void update(UserDto.Request requestDto, PasswordEncoder passwordEncoder) {
+    public void updateData(UserDto.Request requestDto, PasswordEncoder passwordEncoder) {
 
         if (requestDto.getUserName() != null) {
             this.userName = requestDto.getUserName();
