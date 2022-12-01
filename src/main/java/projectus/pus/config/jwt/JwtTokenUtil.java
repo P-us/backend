@@ -45,12 +45,12 @@ public class JwtTokenUtil {
         return expiration.before(new Date());
     }
 
-    public String generateAccessToken(String username) {
-        return doGenerateToken(username, ACCESS_TOKEN_EXPIRATION_TIME.getValue());
+    public String generateAccessToken(String email) {
+        return doGenerateToken(email, ACCESS_TOKEN_EXPIRATION_TIME.getValue());
     }
 
-    public String generateRefreshToken(String username) {
-        return doGenerateToken(username, REFRESH_TOKEN_EXPIRATION_TIME.getValue());
+    public String generateRefreshToken(String email) {
+        return doGenerateToken(email, REFRESH_TOKEN_EXPIRATION_TIME.getValue());
     }
 
     private String doGenerateToken(String email, long expireTime) {

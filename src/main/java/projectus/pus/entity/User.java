@@ -28,6 +28,7 @@ public class User {
     @GeneratedValue(strategy= GenerationType.AUTO)
     @Column(name = "user_id")
     private Long id;
+
     private String email;
     private String password;
     private String userName;
@@ -36,13 +37,16 @@ public class User {
     @Builder.Default
     private Set<Authority> authorities = new HashSet<>();
 
-    public User(Long id, String email, String password, String userName){
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.userName = userName;
+    public static User toEntity(UserDto.Request requestDto, PasswordEncoder passwordEncoder){
 
-        addAuthority(Authority.toUser(this));
+        User user = User.builder()
+                .email(requestDto.getEmail())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .userName(requestDto.getUserName())
+                .build();
+        user.addAuthority(Authority.ofUser(user));
+
+        return user;
     }
 
     private void addAuthority(Authority authority) {

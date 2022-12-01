@@ -37,15 +37,8 @@ public class UserService {
 
     public Long addUser(UserDto.Request requestDto) {
         validateDuplicateUser(requestDto);
-        User user = userRepository.save(requestDto.toEntity(passwordEncoder));
-
+        User user = userRepository.save(User.toEntity(requestDto, passwordEncoder));
         return user.getId();
-    }
-    private void validateDuplicateUser(UserDto.Request requestDto) {
-        if(userRepository.existsByEmail(requestDto.getEmail()))
-            throw new IllegalArgumentException("해당 이메일이 이미 존재합니다.");
-        if(userRepository.existsByUserName(requestDto.getUserName()))
-            throw new IllegalArgumentException("해당 닉네임이 이미 존재합니다.");
     }
 
     public UserDto.Response findUser(Long userId) {
@@ -67,7 +60,6 @@ public class UserService {
         userRepository.delete(user);
     }
 
-
     public TokenDto login(UserDto.Login requestDto){
         User user = userRepository.findByEmail(requestDto.getEmail()).orElseThrow(
                 () -> new NoSuchElementException("회원이 없습니다."));
@@ -77,19 +69,8 @@ public class UserService {
         String accessToken = jwtTokenUtil.generateAccessToken(email);
         RefreshToken refreshToken = saveRefreshToken(email);
 
-        return TokenDto.toToken(accessToken, refreshToken.getRefreshToken());
+        return TokenDto.of(accessToken, refreshToken.getRefreshToken());
 
-    }
-
-    private void checkPassword(String rawPassword, String findMemberPassword) {
-        if (!passwordEncoder.matches(rawPassword, findMemberPassword)) {
-            throw new IllegalArgumentException("비밀번호가 맞지 않습니다.");
-        }
-    }
-
-    private RefreshToken saveRefreshToken(String email) {
-        return refreshTokenRedisRepository.save(RefreshToken.createRefreshToken(email,
-                jwtTokenUtil.generateRefreshToken(email), REFRESH_TOKEN_EXPIRATION_TIME.getValue()));
     }
 
     @CacheEvict(value = CacheKey.USER, key = "#email")
@@ -98,10 +79,6 @@ public class UserService {
         long remainMilliSeconds = jwtTokenUtil.getRemainMilliSeconds(accessToken);
         refreshTokenRedisRepository.deleteById(email);
         logoutAccessTokenRedisRepository.save(LogoutAccessToken.of(accessToken, email, remainMilliSeconds));
-    }
-
-    private String resolveToken(String token) {
-        return token.substring(7);
     }
 
     public TokenDto reissue(String refreshToken) {
@@ -115,18 +92,40 @@ public class UserService {
         throw new IllegalArgumentException("토큰이 일치하지 않습니다.");
     }
 
+    private TokenDto reissueRefreshToken(String refreshToken, String email) {
+        if (lessThanReissueExpirationTimesLeft(refreshToken)) {
+            String accessToken = jwtTokenUtil.generateAccessToken(email);
+            return TokenDto.of(accessToken, saveRefreshToken(email).getRefreshToken());
+        }
+        return TokenDto.of(jwtTokenUtil.generateAccessToken(email), refreshToken);
+    }
+
+    private void validateDuplicateUser(UserDto.Request requestDto) {
+        if(userRepository.existsByEmail(requestDto.getEmail()))
+            throw new IllegalArgumentException("해당 이메일이 이미 존재합니다.");
+        if(userRepository.existsByUserName(requestDto.getUserName()))
+            throw new IllegalArgumentException("해당 닉네임이 이미 존재합니다.");
+    }
+
+    private void checkPassword(String rawPassword, String findMemberPassword) {
+        if (!passwordEncoder.matches(rawPassword, findMemberPassword)) {
+            throw new IllegalArgumentException("비밀번호가 맞지 않습니다.");
+        }
+    }
+
+    private RefreshToken saveRefreshToken(String email) {
+        return refreshTokenRedisRepository.save(RefreshToken.createRefreshToken(email,
+                jwtTokenUtil.generateRefreshToken(email), REFRESH_TOKEN_EXPIRATION_TIME.getValue()));
+    }
+
+    private String resolveToken(String token) {
+        return token.substring(7);
+    }
+
     private String getCurrentEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         UserDetails principal = (UserDetails) authentication.getPrincipal();
         return principal.getUsername();
-    }
-
-    private TokenDto reissueRefreshToken(String refreshToken, String email) {
-        if (lessThanReissueExpirationTimesLeft(refreshToken)) {
-            String accessToken = jwtTokenUtil.generateAccessToken(email);
-            return TokenDto.toToken(accessToken, saveRefreshToken(email).getRefreshToken());
-        }
-        return TokenDto.toToken(jwtTokenUtil.generateAccessToken(email), refreshToken);
     }
 
     private boolean lessThanReissueExpirationTimesLeft(String refreshToken) {

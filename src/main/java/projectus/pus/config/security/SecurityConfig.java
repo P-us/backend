@@ -25,14 +25,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final CustomUserDetailService customUserDetailService;
 
-    // authenticationManager를 Bean 등록합니다.
     @Bean
     @Override
     public AuthenticationManager authenticationManagerBean() throws Exception {
         return super.authenticationManagerBean();
     }
 
-    // 암호화에 필요함
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -46,8 +44,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/**").permitAll()
-                .antMatchers("/logout").authenticated()
+                .antMatchers("/", "/api/users/join", "/api/login").permitAll()
+                .antMatchers("/api/logout").authenticated()
                 .anyRequest().hasRole("USER")
 
                 .and()

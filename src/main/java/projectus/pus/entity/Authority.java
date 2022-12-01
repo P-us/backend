@@ -30,14 +30,14 @@ public class Authority implements GrantedAuthority {
 
     private String role;
 
-    public static Authority toUser(User user) {
+    public static Authority ofUser(User user) {
         return Authority.builder()
                 .role("ROLE_USER")
                 .user(user)
                 .build();
     }
 
-    public static Authority toAdmin(User user) {
+    public static Authority ofAdmin(User user) {
         return Authority.builder()
                 .role("ROLE_ADMIN")
                 .user(user)
