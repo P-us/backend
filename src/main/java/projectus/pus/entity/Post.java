@@ -3,6 +3,8 @@ package projectus.pus.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -18,7 +20,10 @@ public class Post extends BaseTimeEntity{
     private Long id;
     private String title;
     private String content;
-    //todo user
+    @ManyToOne
+    @OnDelete(action= OnDeleteAction.CASCADE)
+    @JoinColumn(name="user_id")
+    private User user;
 
     @OneToMany(mappedBy = "post")
     private List<Category> category = new ArrayList<>();
@@ -29,13 +34,17 @@ public class Post extends BaseTimeEntity{
     )
     private List<Photo> photo = new ArrayList<>();
     @Builder
-    public Post(String title, String content) {
+    public Post(String title, String content, User user) {
         this.title = title;
         this.content = content;
+        this.user = user;
     }
     public void update(Post post) {
         this.title = post.title;
         this.content = post.content;
+    }
+    public void setUser(User user){
+        this.user = user;
     }
     public void addCategory(Category category){
         this.category.add(category);

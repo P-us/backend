@@ -20,7 +20,7 @@ import static javax.persistence.CascadeType.ALL;
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User extends BaseTimeEntity{
 
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)

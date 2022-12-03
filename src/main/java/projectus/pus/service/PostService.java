@@ -13,11 +13,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
+import projectus.pus.config.security.CustomUserDetails;
 import projectus.pus.dto.PostDto;
 import projectus.pus.entity.Photo;
 import projectus.pus.entity.Post;
+import projectus.pus.entity.User;
 import projectus.pus.repository.PhotoRepository;
 import projectus.pus.repository.PostRepository;
+import projectus.pus.repository.UserRepository;
 import projectus.pus.utils.PhotoHandler;
 
 import java.io.File;
@@ -39,9 +42,14 @@ public class PostService {
     private final PostRepository postRepository;
     private final PhotoHandler photoHandler;
     private final PhotoRepository photoRepository;
+    private final UserRepository userRepository;
     @Transactional
-    public Long addPost(PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
+    public Long addPost(PostDto.Request requestDto, List<MultipartFile> files, Long userId) throws Exception {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("계정이 존재하지 않습니다.")
+        );
         Post post = requestDto.toEntity();
+        post.setUser(user);
         categoryService.addCategory(requestDto,post);
         List<Photo> photoList = photoHandler.parseFileInfo(files); //todo 시간 남는다면 PhotoService 리팩토링
         if (!photoList.isEmpty()) {
@@ -86,39 +94,58 @@ public class PostService {
         return bytes;
     }
     @Transactional
-    public void updatePost(Long postId, PostDto.Request requestDto, List<MultipartFile> files) throws Exception {
+    public void updatePost(Long postId, PostDto.Request requestDto, List<MultipartFile> files, Long userId) throws Exception {
+        log.info(postId.toString());
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("계정이 존재하지 않습니다.")
+        );
+        log.info(userId.toString());
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
-        categoryService.updateCategory(post, postId, requestDto);
-        List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
-        if(!CollectionUtils.isEmpty(dbPhotoList)){
-            for(Photo dbPhoto : dbPhotoList) {
-                photoRepository.delete(dbPhoto);
-    //            photoHandler.deleteFile(dbPhoto.getFilePath()); //s3
+        if(post.getUser().getId().equals(userId)) {
+            categoryService.updateCategory(post, postId, requestDto);
+            List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
+            if (!CollectionUtils.isEmpty(dbPhotoList)) {
+                for (Photo dbPhoto : dbPhotoList) {
+                    photoRepository.delete(dbPhoto);
+                    //            photoHandler.deleteFile(dbPhoto.getFilePath()); //s3
+                }
+                post.getPhoto().clear();
             }
-            post.getPhoto().clear();
-        }
-        if(!CollectionUtils.isEmpty(files)){
-            List<Photo> photoList = photoHandler.parseFileInfo(files);
-            if(!photoList.isEmpty()) {
-                for(Photo photo : photoList) {
-                    post.addPhoto(photoRepository.save(photo));
+            if (!CollectionUtils.isEmpty(files)) {
+                List<Photo> photoList = photoHandler.parseFileInfo(files);
+                if (!photoList.isEmpty()) {
+                    for (Photo photo : photoList) {
+                        post.addPhoto(photoRepository.save(photo));
+                    }
                 }
             }
+            post.update(requestDto.toEntity());
         }
-        post.update(requestDto.toEntity());
+        else{
+            throw new IllegalArgumentException("해당 계정은 글에 대한 권한이 없습니다.");
+        }
     }
     @Transactional
-    public void deletePost(Long postId) {
+    public void deletePost(Long postId, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("계정이 존재하지 않습니다.")
+        );
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
+        if(post.getUser().getId().equals(userId)){
+            postRepository.delete(post);
+        }
+        else{
+            throw new IllegalArgumentException("해당 계정은 글에 대한 권한이 없습니다.");
+        }
+
 //        List<Photo> dbPhotoList = photoRepository.findAllByPostId(postId);
 //        if(!CollectionUtils.isEmpty(dbPhotoList)){
 //            for(Photo dbPhoto : dbPhotoList) {
 //                photoHandler.deleteFile(dbPhoto.getFilePath()); //s3
 //            }
 //        }
-        postRepository.delete(post);
     }
     @Transactional(readOnly = true)
     public Page<PostDto.Response> search(String category,String title,List<String> tag, Long userId,Pageable pageable) {

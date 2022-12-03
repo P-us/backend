@@ -24,6 +24,7 @@ public class CustomUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
     private String password;
     private String username;
+    private Long userId;
     private Collection<? extends GrantedAuthority> authorities;
 
     public static CustomUserDetails of(User user) {
@@ -34,6 +35,7 @@ public class CustomUserDetails implements UserDetails {
                 .username(user.getEmail())
                 .password(user.getPassword())
                 .authorities(authorities)
+                .userId(user.getId())
                 .build();
     }
     @Override

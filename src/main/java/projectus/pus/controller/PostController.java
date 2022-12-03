@@ -11,6 +11,8 @@ import org.springframework.validation.Errors;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import projectus.pus.config.security.CurrentUser;
+import projectus.pus.config.security.CustomUserDetails;
 import projectus.pus.dto.PostDto;
 import projectus.pus.service.LikesService;
 import projectus.pus.service.PostService;
@@ -31,8 +33,8 @@ public class PostController {
     @PostMapping
     public ResponseEntity<Void> addPost(
             @Validated @RequestPart(value = "photo",required = false) List<MultipartFile> files,
-            @RequestPart(value="requestDto") PostDto.Request requestDto, Errors errors) throws Exception {
-        Long postId = postService.addPost(requestDto, files);
+            @RequestPart(value="requestDto") PostDto.Request requestDto, @CurrentUser CustomUserDetails currentUser, Errors errors) throws Exception {
+        Long postId = postService.addPost(requestDto, files, currentUser.getUserId());
         return ResponseEntity.created(URI.create("/api/posts/"+postId)).build();
     }
     @GetMapping("/{postId}")
@@ -47,30 +49,31 @@ public class PostController {
     public ResponseEntity<Void> updatePost(
             @PathVariable Long postId,
             @RequestPart(value = "photo",required = false) List<MultipartFile> files,
-            @RequestPart(value="requestDto") PostDto.Request requestDto) throws Exception {
-        postService.updatePost(postId, requestDto, files);
+            @RequestPart(value="requestDto") PostDto.Request requestDto,
+            @CurrentUser CustomUserDetails currentUser) throws Exception {
+        postService.updatePost(postId, requestDto, files,currentUser.getUserId());
         return ResponseEntity.ok().build();
     }
     @DeleteMapping("/{postId}")
-    public ResponseEntity<Void> deletePost(@PathVariable Long postId) {
-        postService.deletePost(postId);
+    public ResponseEntity<Void> deletePost(@PathVariable Long postId, @CurrentUser CustomUserDetails currentUser) {
+        postService.deletePost(postId,currentUser.getUserId());
         return ResponseEntity.noContent().build();
     }
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto.Response>> search(
-            @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag,@RequestParam Long userId,  //todo userId jwt 바꾸기
+            @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag, @RequestParam Long userId,  //todo userId jwt 바꾸기
             @PageableDefault(sort="modifiedDate",direction = Sort.Direction.DESC)Pageable pageable) {
         return ResponseEntity.ok().body(postService.search(category,title,tag,userId, pageable));
     }
 
     @GetMapping("/likes/{postId}")
-    public ResponseEntity<Void> likes(@PathVariable Long postId, @RequestParam Long userId){ //todo userId jwt 바꾸기
-        likesService.addLikes(postId,userId);
+    public ResponseEntity<Void> likes(@PathVariable Long postId, @CurrentUser CustomUserDetails currentUser){
+        likesService.addLikes(postId,currentUser.getUserId());
         return ResponseEntity.ok().build();
     }
     @GetMapping("/dislikes/{postId}")
-    public ResponseEntity<Void> dislikes(@PathVariable Long postId, @RequestParam Long userId){ //todo userId jwt 바꾸기
-        likesService.deleteLikes(postId,userId);
+    public ResponseEntity<Void> dislikes(@PathVariable Long postId, @CurrentUser CustomUserDetails currentUser){
+        likesService.deleteLikes(postId,currentUser.getUserId());
         return ResponseEntity.ok().build();
     }
 }
