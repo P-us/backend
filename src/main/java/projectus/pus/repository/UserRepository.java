@@ -2,6 +2,7 @@ package projectus.pus.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import projectus.pus.entity.User;
 
@@ -15,7 +16,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     boolean existsByEmail(String email);
     boolean existsByUserName(String userName);
+    @Query("select u from User u join fetch u.authorities a where u.email = :email ")
+    Optional<User> findByEmailWithAuthority(@Param("email") String email);
 
-//    @Query("select u from User u join fetch u.authorities a where u.email = :email")
-//    Optional<User> findByEmailWithAuthority(String email);
 }

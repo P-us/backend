@@ -24,13 +24,6 @@ public class SignController {
     private final UserService userService;
     private final JwtTokenUtil jwtTokenUtil;
 
-    @PostMapping("/join")
-    public ResponseEntity<Long> addUser(@Validated @RequestBody UserDto.Request requestDto, Errors errors) {
-        Long userId = userService.addUser(requestDto);
-        return ResponseEntity.created(URI.create("/api/users/"+userId)).build();
-    }
-
-
     @PostMapping("/login")
     public ResponseEntity<TokenDto> login(@RequestBody UserDto.Login requestDto) {
         return ResponseEntity.ok(userService.login(requestDto));
@@ -40,7 +33,7 @@ public class SignController {
     public void logout(@RequestHeader("Authorization") String accessToken,
                        @RequestHeader("RefreshToken") String refreshToken) {
         String username = jwtTokenUtil.getEmail(resolveToken(accessToken));
-        userService.logout(TokenDto.toToken(accessToken, refreshToken), username);
+        userService.logout(TokenDto.of(accessToken, refreshToken), username);
     }
 
     private String resolveToken(String accessToken) {

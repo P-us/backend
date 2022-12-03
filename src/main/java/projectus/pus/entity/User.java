@@ -4,12 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import projectus.pus.dto.UserDto;
 
 import javax.persistence.*;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -28,6 +26,7 @@ public class User {
     @GeneratedValue(strategy= GenerationType.AUTO)
     @Column(name = "user_id")
     private Long id;
+
     private String email;
     private String password;
     private String userName;
@@ -36,13 +35,16 @@ public class User {
     @Builder.Default
     private Set<Authority> authorities = new HashSet<>();
 
-    public User(Long id, String email, String password, String userName){
-        this.id = id;
-        this.email = email;
-        this.password = password;
-        this.userName = userName;
+    public static User toEntity(UserDto.Request requestDto, PasswordEncoder passwordEncoder){
 
-        addAuthority(Authority.toUser(this));
+        User user = User.builder()
+                .email(requestDto.getEmail())
+                .password(passwordEncoder.encode(requestDto.getPassword()))
+                .userName(requestDto.getUserName())
+                .build();
+        user.addAuthority(Authority.ofUser(user));
+
+        return user;
     }
 
     private void addAuthority(Authority authority) {
@@ -55,7 +57,7 @@ public class User {
                 .collect(toList());
     }
 
-    public void update(UserDto.Request requestDto, PasswordEncoder passwordEncoder) {
+    public void updateData(UserDto.Request requestDto, PasswordEncoder passwordEncoder) {
 
         if (requestDto.getUserName() != null) {
             this.userName = requestDto.getUserName();

@@ -17,7 +17,7 @@ public class TokenDto {
     private String refreshToken;
 
 
-    public static TokenDto toToken(String accessToken, String refreshToken){
+    public static TokenDto of(String accessToken, String refreshToken){
         return TokenDto.builder()
                 .grantType(JwtHeaderUtilEnums.GRANT_TYPE.getValue())
                 .accessToken(accessToken)

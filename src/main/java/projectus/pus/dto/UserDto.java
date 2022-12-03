@@ -34,16 +34,6 @@ public class UserDto {
         private String userName;
 
 
-
-        public User toEntity(PasswordEncoder passwordEncoder){
-
-            return User.builder()
-                    .email(email)
-                    .password(passwordEncoder.encode(password))
-                    .userName(userName)
-                    .build();
-        }
-
     }
 
     @Getter
@@ -61,14 +51,6 @@ public class UserDto {
         @NotBlank(message = "비밀번호는 필수 입력 값입니다.")
         private String password;
 
-//        public User tologin(){
-//
-//            return User.builder()
-//                    .email(email)
-//                    .password(password)
-//                    .build();
-//        }
-
     }
 
     @Getter
@@ -77,13 +59,11 @@ public class UserDto {
     @AllArgsConstructor
     public static class Response{
         private String email;
-        private String password;
         private String userName;
 
 
         public Response(User entity){
             this.email = entity.getEmail();
-            this.password = entity.getPassword();
             this.userName = entity.getUserName();
         }
     }
