@@ -38,8 +38,8 @@ public class PostController {
         return ResponseEntity.created(URI.create("/api/posts/"+postId)).build();
     }
     @GetMapping("/{postId}")
-    public ResponseEntity<PostDto.Response> getDetailPost(@PathVariable Long postId,@RequestParam Long userId ) { //todo userId jwt 바꾸기
-        return ResponseEntity.ok().body(postService.getDetailPost(postId,userId));
+    public ResponseEntity<PostDto.Response> getDetailPost(@PathVariable Long postId) {
+        return ResponseEntity.ok().body(postService.getDetailPost(postId));
     }
     @GetMapping("/image/{photoId}")
     public ResponseEntity<byte[]> getImage(@PathVariable Long photoId) throws IOException {
@@ -61,19 +61,23 @@ public class PostController {
     }
     @GetMapping("/search")
     public ResponseEntity<Page<PostDto.Response>> search(
-            @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag, @RequestParam Long userId,  //todo userId jwt 바꾸기
+            @RequestParam String category, @RequestParam String title, @RequestParam List<String> tag,
             @PageableDefault(sort="modifiedDate",direction = Sort.Direction.DESC)Pageable pageable) {
-        return ResponseEntity.ok().body(postService.search(category,title,tag,userId, pageable));
+        return ResponseEntity.ok().body(postService.search(category,title,tag, pageable));
     }
 
-    @GetMapping("/likes/{postId}")
+    @GetMapping("/likes/good/{postId}")
     public ResponseEntity<Void> likes(@PathVariable Long postId, @CurrentUser CustomUserDetails currentUser){
         likesService.addLikes(postId,currentUser.getUserId());
         return ResponseEntity.ok().build();
     }
-    @GetMapping("/dislikes/{postId}")
+    @GetMapping("/likes/bad/{postId}")
     public ResponseEntity<Void> dislikes(@PathVariable Long postId, @CurrentUser CustomUserDetails currentUser){
         likesService.deleteLikes(postId,currentUser.getUserId());
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/likes/check/{postId}")
+    public ResponseEntity<Boolean> checkLikes(@PathVariable Long postId, @CurrentUser CustomUserDetails currentUser){
+        return ResponseEntity.ok().body(likesService.checkLikes(postId, currentUser.getUserId()));
     }
 }

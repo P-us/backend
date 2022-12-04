@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.multipart.MultipartFile;
-import projectus.pus.config.security.CustomUserDetails;
 import projectus.pus.dto.PostDto;
 import projectus.pus.entity.Photo;
 import projectus.pus.entity.Post;
@@ -60,7 +59,7 @@ public class PostService {
         return postRepository.save(post).getId();
     }
     @Transactional(readOnly = true)
-    public PostDto.Response getDetailPost(Long postId,Long userId) {
+    public PostDto.Response getDetailPost(Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         //List<Long> fileId = post.getPhoto().stream().map(Photo::getId).collect(Collectors.toList());
@@ -68,7 +67,7 @@ public class PostService {
                  .stream()
                  .map(Photo::getId)
                  .collect(Collectors.toList());
-        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId), likesService.getLikes(postId,userId));
+        return new PostDto.Response(post,fileId,categoryService.getCategoryList(postId), likesService.getLikesCount(postId));
     }
     @Transactional(readOnly = true)
     public byte[] getImage(Long photoId) throws IOException {
@@ -95,11 +94,9 @@ public class PostService {
     }
     @Transactional
     public void updatePost(Long postId, PostDto.Request requestDto, List<MultipartFile> files, Long userId) throws Exception {
-        log.info(postId.toString());
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("계정이 존재하지 않습니다.")
         );
-        log.info(userId.toString());
         Post post = postRepository.findById(postId).orElseThrow(
                 ()-> new IllegalArgumentException("해당 아이디가 존재하지 않습니다."));
         if(post.getUser().getId().equals(userId)) {
@@ -148,7 +145,7 @@ public class PostService {
 //        }
     }
     @Transactional(readOnly = true)
-    public Page<PostDto.Response> search(String category,String title,List<String> tag, Long userId,Pageable pageable) {
+    public Page<PostDto.Response> search(String category,String title,List<String> tag, Pageable pageable) {
         List<Long> searchId = categoryService.search(category,tag);
         List<Post> postList;
         if(!searchId.isEmpty()) {
@@ -165,7 +162,7 @@ public class PostService {
         List<PostDto.Response> collect = postList
                 .stream()
                 .map(post ->
-                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()), likesService.getLikes(post.getId(),userId))) //todo postDto에 좋아요 숫자 추가하고, response에 likeService.getLike
+                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()), likesService.getLikesCount(post.getId()))) //todo postDto에 좋아요 숫자 추가하고, response에 likeService.getLike
                 .collect(Collectors.toList());
         int start = (int)pageable.getOffset();
         int end = Math.min((start+pageable.getPageSize()),collect.size());

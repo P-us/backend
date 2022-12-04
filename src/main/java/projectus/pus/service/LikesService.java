@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
 import projectus.pus.dto.PostDto;
 import projectus.pus.entity.Likes;
 import projectus.pus.entity.Post;
@@ -16,9 +17,9 @@ import projectus.pus.repository.UserRepository;
 @Slf4j
 @RequiredArgsConstructor
 public class LikesService {
-    private LikesRepository likesRepository;
-    private UserRepository userRepository;
-    private PostRepository postRepository;
+    private final LikesRepository likesRepository;
+    private final UserRepository userRepository;
+    private final PostRepository postRepository;
 
     @Transactional
     public void addLikes(Long postId, Long userId){
@@ -26,7 +27,7 @@ public class LikesService {
                 () -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("계정이 존재하지 않습니다."));
-        if(likesRepository.findByPostIdAndUserId(postId, userId)==null){
+        if(ObjectUtils.isEmpty(likesRepository.findByPostIdAndUserId(postId, userId))){
             Likes likes = Likes.builder()
                     .post(post)
                     .user(user)
@@ -49,18 +50,19 @@ public class LikesService {
             likesRepository.delete(likes);
         }
     }
-    @Transactional(readOnly = true) //해당 유저가 좋아요를 눌렀는지 여부랑 그 게시글의 총 좋아요 수
-    public PostDto.LikesResponse getLikes(Long postId, Long userId){
-        validatePostAndUser(postId, userId);
+    @Transactional(readOnly = true)
+    public PostDto.LikesResponse getLikesCount(Long postId){
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new IllegalArgumentException("게시글이 존재하지 않습니다."));
         int likeCount = likesRepository.findAllByPostId(postId).size();
-        if(likesRepository.findByPostIdAndUserId(postId, userId)==null){
-            return new PostDto.LikesResponse(likeCount,false);
-        }
-        else {
-            return new PostDto.LikesResponse(likeCount, true);
-        }
+        return new PostDto.LikesResponse(likeCount);
     }
 
+    @Transactional(readOnly = true)
+    public boolean checkLikes(Long postId, Long userId) {
+        validatePostAndUser(postId,userId);
+        return likesRepository.findByPostIdAndUserId(postId, userId) != null;
+    }
     private void validatePostAndUser(Long postId, Long userId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new IllegalArgumentException("게시글이 존재하지 않습니다."));

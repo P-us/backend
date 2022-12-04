@@ -49,7 +49,7 @@ public class PostDto {
         private List<CategoryResponse> category;
         private List<Long> photoId;
         private Long likesCount;
-        private boolean check;
+
         public Response(Post entity, List<CategoryResponse> category,LikesResponse likesResponse){
             this.postId = entity.getId();
             this.title = entity.getTitle();
@@ -68,7 +68,6 @@ public class PostDto {
             this.category = category;
             this.photoId = photoId;
             this.likesCount = likesResponse.getLikesCount();
-            this.check = likesResponse.isCheck();
         }
     }
     @Getter
@@ -83,6 +82,5 @@ public class PostDto {
     @AllArgsConstructor
     public static class LikesResponse{
         private long likesCount;
-        private boolean check;
     }
 }
