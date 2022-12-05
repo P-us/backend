@@ -29,6 +29,8 @@ dependencies {
 	testImplementation 'org.springframework.security:spring-security-test'
 	implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation', version: '2.5.6'
 
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+
 	// security + jwt
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.security:spring-security-test'

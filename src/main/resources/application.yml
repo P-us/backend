@@ -17,6 +17,9 @@ spring:
     port: 6379
     host: localhost
 
+  profiles:
+    active: s3
+
 # HS256????, 32byte ?? secret key ??
 # echo -n 'thisisstudymatcingprojectnamedpus'
 jwt:
