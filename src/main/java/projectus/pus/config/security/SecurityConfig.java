@@ -48,8 +48,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "/api/users/join", "/api/login").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/posts/**").permitAll()
-                .antMatchers("/api/posts/likes/**").authenticated()
+                .antMatchers(HttpMethod.GET,"/api/posts/**","/api/comments/**").permitAll()
+                .antMatchers("/api/posts/likes/**","/api/comments/**").authenticated()
                 .antMatchers("/api/logout","/api/posts/**").authenticated()
                 .anyRequest().hasRole("USER")
 

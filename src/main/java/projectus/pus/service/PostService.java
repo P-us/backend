@@ -162,7 +162,7 @@ public class PostService {
         List<PostDto.Response> collect = postList
                 .stream()
                 .map(post ->
-                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()), likesService.getLikesCount(post.getId()))) //todo postDto에 좋아요 숫자 추가하고, response에 likeService.getLike
+                        new PostDto.Response(post,categoryService.getCategoryList(post.getId()), likesService.getLikesCount(post.getId())))
                 .collect(Collectors.toList());
         int start = (int)pageable.getOffset();
         int end = Math.min((start+pageable.getPageSize()),collect.size());

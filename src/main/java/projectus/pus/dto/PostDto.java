@@ -19,7 +19,6 @@ public class PostDto {
         @NotBlank(message = "제목은 필수 입력 값입니다.")
         private String title;
         private String content;
-        //todo user
         private List<CategoryRequest> category;
         public Post toEntity(){
             return Post.builder()

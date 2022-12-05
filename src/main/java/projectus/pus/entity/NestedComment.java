@@ -11,10 +11,10 @@ import javax.persistence.*;
 @Getter
 @Entity
 @NoArgsConstructor
-public class Comment extends BaseTimeEntity{
+public class NestedComment extends BaseTimeEntity{
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
-    @Column(name = "comment_id")
+    @Column(name = "nestedComment_id")
     private Long id;
 
     private String content;
@@ -26,14 +26,14 @@ public class Comment extends BaseTimeEntity{
 
     @ManyToOne
     @OnDelete(action= OnDeleteAction.CASCADE)
-    @JoinColumn(name="post_id")
-    private Post post;
+    @JoinColumn(name="comment_id")
+    private Comment comment;
 
     @Builder
-    public Comment(String content, User user, Post post){
+    public NestedComment(String content, User user, Comment comment){
         this.content = content;
         this.user = user;
-        this.post = post;
+        this.comment = comment;
     }
 
     public void update(String content) {
