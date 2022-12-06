@@ -39,4 +39,10 @@ public class SignController {
     private String resolveToken(String accessToken) {
         return accessToken.substring(7);
     }
+
+    @PostMapping("/reissue")
+    public ResponseEntity<TokenDto> reissue(@RequestHeader("Authorization") String accessToken,
+                                            @RequestHeader("RefreshToken") String refreshToken) {
+        return ResponseEntity.ok(userService.reissue(accessToken, refreshToken));
+    }
 }

@@ -80,9 +80,9 @@ public class UserService {
         logoutAccessTokenRedisRepository.save(LogoutAccessToken.of(accessToken, email, remainMilliSeconds));
     }
 
-    public TokenDto reissue(String refreshToken) {
+    public TokenDto reissue(String accessToken, String refreshToken) {
         refreshToken = resolveToken(refreshToken);
-        String email = getCurrentEmail();
+        String email = jwtTokenUtil.getEmail(resolveToken(accessToken));
         RefreshToken redisRefreshToken = refreshTokenRedisRepository.findById(email).orElseThrow(NoSuchElementException::new);
 
         if (refreshToken.equals(redisRefreshToken.getRefreshToken())) {
