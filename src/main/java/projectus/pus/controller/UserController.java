@@ -13,6 +13,7 @@ import projectus.pus.config.security.CustomUserDetails;
 import projectus.pus.dto.UserDto;
 import projectus.pus.entity.User;
 import projectus.pus.repository.UserRepository;
+import projectus.pus.service.MailService;
 import projectus.pus.service.UserService;
 
 import java.net.URI;
@@ -21,11 +22,13 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @RestController
 @Slf4j
-@RequestMapping("/api/users")
+@RequestMapping("/api")
 public class UserController {
 
     @Autowired
     private final UserService userService;
+    @Autowired
+    private final MailService mailService;
     @Autowired
     private final UserRepository userRepository;
 
@@ -35,25 +38,39 @@ public class UserController {
         return ResponseEntity.created(URI.create("/api/users/"+userId)).build();
     }
 
-    @GetMapping("/{userId}")
+    @PostMapping("/join/mailConfirm")
+    @ResponseBody
+    public String mailConfirm(@RequestParam String email) throws Exception {
+        String code = mailService.sendSimpleMessage(email);
+        log.info("인증코드 : " + code);
+        return code;
+    }
+
+    @PostMapping("/join/mailCheck")
+    @ResponseBody
+    public void mailCheck(@RequestParam String check) {
+        mailService.checkMail(check);
+    }
+
+    @GetMapping("/users/{userId}")
     public ResponseEntity<UserDto.Response> getUser(@PathVariable Long userId) {
         UserDto.Response responseDto = userService.findUser(userId);
         return ResponseEntity.ok().body(responseDto);
     }
 
-    @PatchMapping("/{userId}")
+    @PatchMapping("/users/{userId}")
     public ResponseEntity<Void> updateUser(@PathVariable Long userId, @RequestBody UserDto.Request requestDto) {
         userService.updateUser(userId, requestDto);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{userId}")
+    @DeleteMapping("/users/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.noContent().build(); //별도로 반환해야 할 데이터가 없을경우 +201
     }
     @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("/me")
+    @GetMapping("/users/me")
     public void getCurrentUser(@CurrentUser CustomUserDetails user) {
         log.info(user.getUsername());
         log.info(user.getPassword());

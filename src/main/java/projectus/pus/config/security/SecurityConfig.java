@@ -3,7 +3,6 @@ package projectus.pus.config.security;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
@@ -48,9 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .authorizeRequests()
                 .antMatchers("/", "/api/users/join", "/api/login").permitAll()
-                .antMatchers(HttpMethod.GET,"/api/posts/**","/api/comments/**").permitAll()
-                .antMatchers("/api/posts/likes/**","/api/comments/**").authenticated()
-                .antMatchers("/api/logout","/api/posts/**").authenticated()
+                .antMatchers("/api/logout").authenticated()
                 .anyRequest().hasRole("USER")
 
                 .and()
