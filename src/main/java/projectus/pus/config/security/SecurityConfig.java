@@ -49,8 +49,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers("/","/api/join", "/api/join/**", "/api/login","/api/reissue").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/posts/**","/api/comments/**").permitAll()
-                .antMatchers("/api/posts/likes/**","/api/comments/**").authenticated()
-                .antMatchers("/api/logout","/api/posts/**").authenticated()
+                .antMatchers("/api/posts/**", "/api/posts/likes/**","/api/comments/**", "/api/users/**", "/api/logout").authenticated()
                 .anyRequest().hasRole("ADMIN")
 
                 .and()
