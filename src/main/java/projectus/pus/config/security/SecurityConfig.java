@@ -50,6 +50,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers("/","/api/join", "/api/join/**", "/api/login","/api/reissue").permitAll()
                 .antMatchers(HttpMethod.GET,"/api/posts/**","/api/comments/**").permitAll()
                 .antMatchers("/api/posts/**", "/api/posts/likes/**","/api/comments/**", "/api/users/**", "/api/logout").authenticated()
+                .antMatchers("/api/chats/**").authenticated()
+                .antMatchers("/stomp/chat").permitAll()
                 .anyRequest().hasRole("ADMIN")
 
                 .and()
