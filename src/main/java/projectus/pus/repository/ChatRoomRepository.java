@@ -1,36 +1,16 @@
 package projectus.pus.repository;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
-import projectus.pus.dto.ChatDto;
+import projectus.pus.entity.ChatRoom;
 
-import javax.annotation.PostConstruct;
-import java.util.*;
+import java.util.List;
 
 @Repository
-public class ChatRoomRepository { //todo 우선은 Map Collection에 저장하지만 DB에 저장해야한다 무조건
-    private Map<String, ChatDto.ChatRoom> chatRoomDTOMap;
-
-    @PostConstruct
-    private void init(){
-        chatRoomDTOMap = new LinkedHashMap<>();
-    }
-
-    public List<ChatDto.ChatRoom> findAllRooms(){
-        //채팅방 생성 순서 최근 순으로 반환
-        List<ChatDto.ChatRoom> result = new ArrayList<>(chatRoomDTOMap.values());
-        Collections.reverse(result);
-
-        return result;
-    }
-
-    public ChatDto.ChatRoom findRoomById(String id){
-        return chatRoomDTOMap.get(id);
-    }
-
-    public ChatDto.ChatRoom createChatRoomDTO(String name){
-        ChatDto.ChatRoom room = ChatDto.ChatRoom.create(name);
-        chatRoomDTOMap.put(room.getRoomId(), room);
-
-        return room;
-    }
+public interface ChatRoomRepository extends JpaRepository<ChatRoom,Long> {
+    @Query("SELECT distinct c FROM ChatRoom c WHERE c.host.id =:userId ")
+    List<ChatRoom> findByHost(@Param("userId") Long userId);
 }

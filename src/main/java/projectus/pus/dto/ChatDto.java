@@ -1,8 +1,8 @@
 package projectus.pus.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.web.socket.WebSocketSession;
+import projectus.pus.entity.ChatRoom;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -12,25 +12,32 @@ public class ChatDto {
     @Getter
     @Setter //todo setter 대신 다른거로 대체
     public static class ChatMessage {
-
-        private String roomId;
+        private Long roomId;
         private String writer;
         private String message;
+        private String type;
     }
 
     @Getter
-    @Setter
-    public static class ChatRoom {
-        private String roomId;
-        private String name;
-        private Set<WebSocketSession> sessions = new HashSet<>();
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChatRoomRequest {
+        private String title;
+    }
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ChatRoomResponse {
+        private Long roomId;
+        private String title;
+        private String host;
 
-        public static ChatRoom create(String name){
-            ChatRoom room = new ChatDto.ChatRoom();
-            room.roomId = UUID.randomUUID().toString();
-            room.name = name;
-            return room;
+        public ChatRoomResponse(ChatRoom chatRoom){
+            this.roomId = chatRoom.getId();
+            this.title = chatRoom.getTitle();
+            this.host = chatRoom.getHost().getUserName();
         }
-
     }
 }
