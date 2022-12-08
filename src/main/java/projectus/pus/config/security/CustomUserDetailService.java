@@ -7,8 +7,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import projectus.pus.config.cache.CacheKey;
-import projectus.pus.entity.User;
-import projectus.pus.repository.UserRepository;
+import projectus.pus.entity.user.User;
+import projectus.pus.repository.user.UserRepository;
 
 import java.util.NoSuchElementException;
 

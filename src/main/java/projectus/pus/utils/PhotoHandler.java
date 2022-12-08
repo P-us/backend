@@ -10,8 +10,8 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
-import projectus.pus.dto.PhotoDto;
-import projectus.pus.entity.Photo;
+import projectus.pus.dto.post.PhotoDto;
+import projectus.pus.entity.post.Photo;
 
 import java.io.File;
 import java.io.IOException;

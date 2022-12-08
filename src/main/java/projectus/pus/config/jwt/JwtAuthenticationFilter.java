@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import projectus.pus.config.security.CustomUserDetailService;
-import projectus.pus.repository.LogoutAccessTokenRedisRepository;
+import projectus.pus.repository.user.LogoutAccessTokenRedisRepository;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;

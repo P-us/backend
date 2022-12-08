@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import projectus.pus.entity.User;
+import projectus.pus.entity.user.User;
 
 import java.util.ArrayList;
 import java.util.Collection;
