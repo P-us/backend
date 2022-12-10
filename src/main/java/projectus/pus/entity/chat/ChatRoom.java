@@ -9,6 +9,8 @@ import projectus.pus.entity.BaseTimeEntity;
 import projectus.pus.entity.user.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -26,11 +28,22 @@ public class ChatRoom extends BaseTimeEntity {
     @JoinColumn(name="user_id")
     private User host;
 
-    //todo 참여자 manytomany participant
+    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL)
+    private List<Participant> participants = new ArrayList<>();
 
     @Builder
     public ChatRoom(String title, User user){
         this.title = title;
         this.host = user;
+    }
+    public void out(Participant participantEntity){
+        int i = 0;
+        for(Participant participant : getParticipants()){
+            if(participant.getId() == participantEntity.getId()){
+                getParticipants().remove(i);
+                break;
+            }
+            i++;
+        }
     }
 }

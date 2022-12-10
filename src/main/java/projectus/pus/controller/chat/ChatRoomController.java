@@ -33,13 +33,24 @@ public class ChatRoomController { //이곳에서 여러 상황에 따라 케이�
 //    }
     @GetMapping("/room/{roomId}")
     public ResponseEntity<ChatDto.ChatRoomResponse> getRoom(@PathVariable Long roomId){
+        System.out.println("roomId = " + roomId);
         return ResponseEntity.ok().body(chatRoomService.getRoom(roomId));
     }
     @GetMapping("/rooms")
     public ResponseEntity<Page<ChatDto.ChatRoomResponse>> getRoomList(
             @CurrentUser CustomUserDetails currentUser,
             @PageableDefault(sort="modifiedDate",direction = Sort.Direction.DESC) Pageable pageable){ // todo ? 바꾸기
-        return ResponseEntity.ok().body(chatRoomService.getAllRooms(currentUser.getUserId(),pageable));
+        return ResponseEntity.ok().body(chatRoomService.getRoomList(currentUser.getUserId(),pageable));
     }
 
+    @PostMapping("/room/{roomId}/user")
+    public ResponseEntity<Void> participateRoom(@PathVariable Long roomId, @CurrentUser CustomUserDetails currentUser){
+        chatRoomService.participateRoom(currentUser.getUserId(),roomId);
+        return ResponseEntity.ok().build();
+    }
+    @DeleteMapping("/room/{roomId}/user")
+    public ResponseEntity<Void> leaveRoom(@PathVariable Long roomId, @CurrentUser CustomUserDetails currentUser){
+        chatRoomService.leaveRoom(currentUser.getUserId(),roomId);
+        return ResponseEntity.ok().build();
+    }
 }

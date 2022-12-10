@@ -22,13 +22,16 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
     private final ChatRoomRepository chatRoomRepository;
     private final UserRepository userRepository;
+    private final ParticipantService participantService;
 
     @Transactional
     public Long createRoom(String title, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("계정이 존재하지 않습니다."));
         ChatRoom chatRoom = new ChatRoom(title, user);
-        return chatRoomRepository.save(chatRoom).getId();
+        Long roomId = chatRoomRepository.save(chatRoom).getId();
+        participantService.save(user,chatRoom);
+        return roomId;
     }
     @Transactional(readOnly = true)
     public ChatDto.ChatRoomResponse getRoom(Long roomId) {
@@ -38,10 +41,10 @@ public class ChatRoomService {
     }
 
     @Transactional(readOnly = true)
-    public Page<ChatDto.ChatRoomResponse> getAllRooms(Long userId, Pageable pageable) {
+    public Page<ChatDto.ChatRoomResponse> getRoomList(Long userId, Pageable pageable) {
         User user = userRepository.findById(userId).orElseThrow(
                 () -> new IllegalArgumentException("계정이 존재하지 않습니다."));
-        List<ChatRoom> roomList = chatRoomRepository.findByHost(userId);
+        List<ChatRoom> roomList = chatRoomRepository.findByUserId(userId);
         List<ChatDto.ChatRoomResponse> collect = roomList
                 .stream()
                 .map(ChatDto.ChatRoomResponse::new)
@@ -49,5 +52,22 @@ public class ChatRoomService {
         int start = (int)pageable.getOffset();
         int end = Math.min((start+pageable.getPageSize()),collect.size());
         return new PageImpl<>(collect.subList(start, end), pageable, collect.size());
+    }
+
+    @Transactional
+    public void participateRoom(Long userId, Long roomId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+        participantService.save(user,chatRoom);
+    }
+    @Transactional
+    public void leaveRoom(Long userId, Long roomId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        ChatRoom chatRoom = chatRoomRepository.findById(roomId).orElseThrow(
+                () -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+        participantService.out(user,chatRoom);
     }
 }

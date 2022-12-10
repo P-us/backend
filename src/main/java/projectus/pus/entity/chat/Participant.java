@@ -1,5 +1,6 @@
 package projectus.pus.entity.chat;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
@@ -27,4 +28,14 @@ public class Participant extends BaseTimeEntity {
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JoinColumn(name="room_id")
     private ChatRoom chatRoom;
+
+    @Builder
+    public Participant(User user, ChatRoom chatRoom){
+        this.user = user;
+        this.chatRoom = chatRoom;
+    }
+    public void addChatRoom(ChatRoom chatRoom){
+        this.chatRoom = chatRoom;
+        chatRoom.getParticipants().add(this);
+    }
 }
