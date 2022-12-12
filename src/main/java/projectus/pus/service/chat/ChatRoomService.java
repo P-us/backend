@@ -8,8 +8,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import projectus.pus.dto.chat.ChatDto;
+import projectus.pus.entity.chat.ChatMessage;
 import projectus.pus.entity.chat.ChatRoom;
 import projectus.pus.entity.user.User;
+import projectus.pus.repository.chat.ChatRepository;
 import projectus.pus.repository.chat.ChatRoomRepository;
 import projectus.pus.repository.user.UserRepository;
 
@@ -70,4 +72,5 @@ public class ChatRoomService {
                 () -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
         participantService.out(user,chatRoom);
     }
+
 }

@@ -3,18 +3,42 @@ package projectus.pus.dto.chat;
 import lombok.*;
 import projectus.pus.entity.chat.ChatRoom;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ChatDto {
     @Getter
-    @Setter //todo setter 대신 다른거로 대체
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class ChatMessage {
         private Long roomId;
         private String writer;
         private String message;
         private String type;
+
+        public ChatMessage updateMessage(ChatMessage chatMessage, String msg) {
+            this.roomId = chatMessage.getRoomId();
+            this.writer = chatMessage.getWriter();
+            this.message = msg;
+            this.type = chatMessage.getType();
+
+            return chatMessage;
+        }
     }
+
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Chat {
+        private Long userId;
+        private String writer;
+        private String message;
+        private LocalDateTime sendAt;
+    }
+
 
     @Getter
     @Builder

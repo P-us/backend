@@ -36,7 +36,7 @@ public class UserService {
 
     public Long addUser(UserDto.Request requestDto) {
         validateDuplicateUser(requestDto);
-        User user = userRepository.save(User.toEntity(requestDto, passwordEncoder));
+        User user = userRepository.save(User.of(requestDto, passwordEncoder));
         return user.getId();
     }
 

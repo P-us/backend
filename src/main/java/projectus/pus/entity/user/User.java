@@ -36,7 +36,7 @@ public class User extends BaseTimeEntity {
     @Builder.Default
     private Set<Authority> authorities = new HashSet<>();
 
-    public static User toEntity(UserDto.Request requestDto, PasswordEncoder passwordEncoder){
+    public static User of(UserDto.Request requestDto, PasswordEncoder passwordEncoder){
 
         User user = User.builder()
                 .email(requestDto.getEmail())
