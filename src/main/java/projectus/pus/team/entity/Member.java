@@ -5,11 +5,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
-import projectus.pus.chat.entity.ChatRoom;
 import projectus.pus.common.entity.BaseTimeEntity;
 import projectus.pus.user.entity.User;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Entity
@@ -30,6 +31,8 @@ public class Member extends BaseTimeEntity {
     @JoinColumn(name="team_id")
     private Team team;
 
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL)
+    private List<Schedule> schedules = new ArrayList<>();
     @Builder
     public Member(User user, Team team){
         this.user = user;
@@ -39,4 +42,5 @@ public class Member extends BaseTimeEntity {
         this.team = team;
         team.getMembers().add(this);
     }
+
 }

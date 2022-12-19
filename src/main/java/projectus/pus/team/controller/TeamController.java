@@ -7,8 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import projectus.pus.chat.dto.ChatDto;
-import projectus.pus.chat.service.ChatRoomService;
 import projectus.pus.config.security.CurrentUser;
 import projectus.pus.config.security.CustomUserDetails;
 import projectus.pus.team.dto.TeamDto;

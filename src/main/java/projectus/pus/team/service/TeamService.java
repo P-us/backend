@@ -7,8 +7,6 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import projectus.pus.chat.dto.ChatDto;
-import projectus.pus.chat.entity.ChatRoom;
 import projectus.pus.team.dto.TeamDto;
 import projectus.pus.team.entity.Team;
 import projectus.pus.team.repository.TeamRepository;

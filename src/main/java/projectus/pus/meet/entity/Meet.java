@@ -22,4 +22,6 @@ public class Meet extends BaseTimeEntity {
     @OnDelete(action= OnDeleteAction.CASCADE)
     @JoinColumn(name="user_id")
     private User host;
+
+
 }
