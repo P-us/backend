@@ -9,10 +9,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import projectus.pus.config.security.CurrentUser;
 import projectus.pus.config.security.CustomUserDetails;
+import projectus.pus.team.dto.ScheduleDto;
 import projectus.pus.team.dto.TeamDto;
 import projectus.pus.team.service.TeamService;
 
 import java.net.URI;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -47,5 +49,11 @@ public class TeamController {
     public ResponseEntity<Void> leaveTeam(@PathVariable Long teamId, @CurrentUser CustomUserDetails currentUser){
         teamService.leaveTeam(currentUser.getUserId(),teamId);
         return ResponseEntity.ok().build();
+    }
+    @PostMapping("{teamId}/meet")
+    public ResponseEntity<List<ScheduleDto.Response>> createMeet(
+            @PathVariable Long teamId,
+            @CurrentUser CustomUserDetails currentUser){
+        return ResponseEntity.ok().body(teamService.createMeet(currentUser.getUserId(), teamId));
     }
 }

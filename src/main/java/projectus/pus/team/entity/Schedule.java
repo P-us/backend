@@ -8,7 +8,7 @@ import org.hibernate.annotations.OnDeleteAction;
 import projectus.pus.common.entity.BaseTimeEntity;
 
 import javax.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Getter
 @Entity
@@ -26,11 +26,11 @@ public class Schedule extends BaseTimeEntity {
 
     private String day;
 
-    private LocalDateTime start;
-    private LocalDateTime end;
+    private LocalTime start;
+    private LocalTime end;
 
     @Builder
-    public Schedule(String day, LocalDateTime start, LocalDateTime end, Member member){
+    public Schedule(String day, LocalTime start, LocalTime end, Member member){
         this.day = day;
         this.start = start;
         this.end = end;

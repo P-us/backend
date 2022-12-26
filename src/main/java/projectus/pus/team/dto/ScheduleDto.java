@@ -4,9 +4,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import projectus.pus.team.entity.Schedule;
 
-import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ScheduleDto {
     @Getter
@@ -28,15 +31,26 @@ public class ScheduleDto {
     @NoArgsConstructor
     @AllArgsConstructor
     public static class AvailableTimesRequest{
-        private LocalDateTime start;
-        private LocalDateTime end;
+        private LocalTime start;
+        private LocalTime end;
     }
 
 
-//    @Getter
-//    @Builder
-//    @NoArgsConstructor
-//    @AllArgsConstructor
-//    public static class Response {
-//    }
+    @Getter
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Response {
+        private String name;
+        private List<DayResponse> responses;
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DayResponse {
+        private String day;
+        private LocalTime start;
+        private LocalTime end;
+    }
 }

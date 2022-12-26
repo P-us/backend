@@ -7,8 +7,12 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import projectus.pus.team.dto.ScheduleDto;
 import projectus.pus.team.dto.TeamDto;
+import projectus.pus.team.entity.Member;
 import projectus.pus.team.entity.Team;
+import projectus.pus.team.repository.MemberRepository;
+import projectus.pus.team.repository.ScheduleRepository;
 import projectus.pus.team.repository.TeamRepository;
 import projectus.pus.user.entity.User;
 import projectus.pus.user.repository.UserRepository;
@@ -23,6 +27,8 @@ public class TeamService {
     private final TeamRepository teamRepository;
     private final MemberService memberService;
     private final UserRepository userRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final MemberRepository memberRepository;
     @Transactional
     public Long createTeam(String name, Long userId){
         User user = userRepository.findById(userId).orElseThrow(
@@ -69,5 +75,25 @@ public class TeamService {
         Team team = teamRepository.findById(teamId).orElseThrow(
                 () -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
         memberService.out(user,team);
+    }
+    @Transactional
+    public List<ScheduleDto.Response> createMeet(Long userId, Long teamId){
+        User user = userRepository.findById(userId).orElseThrow(
+                () -> new IllegalArgumentException("계정이 존재하지 않습니다."));
+        Team team = teamRepository.findById(teamId).orElseThrow(
+                () -> new IllegalArgumentException("채팅방이 존재하지 않습니다."));
+        List<Member> memberList = memberRepository.findAllByTeam(team);
+        return memberList
+                .stream()
+                .map(member -> new ScheduleDto.Response(member.getUser().getUserName(), getSchedule(member)))
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public List<ScheduleDto.DayResponse> getSchedule(Member member){
+        return scheduleRepository.findAllByMember(member)
+                .stream()
+                .map(schedule -> new ScheduleDto.DayResponse(schedule.getDay(), schedule.getStart(), schedule.getEnd()))
+                .collect(Collectors.toList());
     }
 }
